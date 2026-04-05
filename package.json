@@ -1,6 +1,6 @@
 {
   "name": "cloudsint",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,13 @@
   "dependencies": {
     "next": "14.2.3",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "next-auth": "^4.24.7",
+    "@auth/prisma-adapter": "^2.4.1",
+    "prisma": "^5.16.0",
+    "@prisma/client": "^5.16.0",
+    "stripe": "^16.2.0",
+    "bcryptjs": "^2.4.3",
+    "nodemailer": "^6.9.14"
   }
 }
