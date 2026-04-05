@@ -1,75 +1,78 @@
-# CloudSINT — OSINT Intelligence Platform
+# CloudSINT v2 — OSINT Intelligence Platform
+**Made by S**
 
-A polished, full-featured OSINT platform built with Next.js 14. Deploy to Vercel in minutes.
+A full-stack OSINT platform with auth, payments, rate limiting, breach data, and AI analysis.
 
-## Features
+## Stack
+- **Next.js 14** (App Router) — frontend + API routes
+- **Prisma + PostgreSQL** — database (use [Neon.tech](https://neon.tech) free tier)
+- **NextAuth.js** — Google OAuth + email/password auth
+- **Stripe** — subscription payments ($9/mo Pro, $29/mo Unlimited)
+- **Anthropic Claude** — AI Analyst module
 
-| Module | What it does |
-|--------|-------------|
-| **Username** | Scans 50+ platforms simultaneously (GitHub, Twitter, Reddit, TikTok, Steam, etc.) |
-| **Email** | Validates format, checks MX/SPF/DMARC/DKIM, detects disposable addresses, pattern analysis |
-| **Phone** | Country code decode, carrier lookup links (Truecaller, WhoCalledUs), social reverse lookup |
-| **IP Address** | Live geolocation, ASN/ISP, reverse DNS, proxy/VPN detection, Shodan link |
-| **Domain / DNS** | Full DNS enumeration (A, AAAA, MX, NS, TXT, CNAME, CAA), email security posture, server geo |
-| **Discord** | Snowflake decode (account creation date), profile links, avatar CDN |
-| **AI Analyst** | Claude-powered OSINT analyst — synthesizes findings, suggests recon vectors |
+## Pages
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page with features, pricing, hero |
+| `/auth` | Sign in / create account (Google + email) |
+| `/dashboard` | Main OSINT tool — all 8 modules |
+| `/pricing` | Full pricing page with Stripe checkout |
 
-All results export to **JSON, CSV, or TXT**.
+## Rate Limits
+| Tier | Lookups |
+|------|---------|
+| Guest (no account) | 5 total |
+| Free account | 20 / day |
+| Pro ($9/mo) | 200 / day |
+| Unlimited ($29/mo) | Unlimited |
 
-## Deploy to Vercel (5 minutes)
+## Deploy to Vercel — Step by Step
 
-### Option A — Deploy from GitHub
+### 1. Database (Neon.tech — free)
+1. Go to [neon.tech](https://neon.tech) → Create project
+2. Copy the connection string → set as `DATABASE_URL`
 
-1. Push this folder to a GitHub repo
-2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo
-3. Add environment variable: `ANTHROPIC_API_KEY` = your key from [console.anthropic.com](https://console.anthropic.com)
-4. Click Deploy
+### 2. Google OAuth
+1. [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services → Credentials
+2. Create OAuth 2.0 Client ID (Web application)
+3. Add authorized redirect URI: `https://your-app.vercel.app/api/auth/callback/google`
+4. Copy Client ID and Secret
 
-### Option B — Deploy with Vercel CLI
+### 3. Stripe
+1. [dashboard.stripe.com](https://dashboard.stripe.com) → Products → Create two products:
+   - **Pro**: $9/month recurring → copy Price ID → `STRIPE_PRICE_PRO`
+   - **Unlimited**: $29/month recurring → copy Price ID → `STRIPE_PRICE_UNLIMITED`
+2. Copy Secret Key → `STRIPE_SECRET_KEY`
+3. After deploy: Webhooks → Add endpoint → `https://your-app.vercel.app/api/webhook` → select `checkout.session.completed` and `customer.subscription.deleted` → copy signing secret → `STRIPE_WEBHOOK_SECRET`
 
+### 4. Deploy
+```bash
+# Push to GitHub
+git init && git add . && git commit -m "CloudSINT v2"
+git remote add origin https://github.com/YOU/cloudsint.git
+git push -u origin main
+```
+1. [vercel.com](https://vercel.com) → New Project → Import repo
+2. Add all environment variables from `.env.example`
+3. Click **Deploy**
+
+### 5. Run DB migrations
 ```bash
 npm install -g vercel
-cd cloudsint
-vercel
-# follow prompts, then:
-vercel env add ANTHROPIC_API_KEY
-vercel --prod
+vercel env pull .env.local
+npx prisma generate
+npx prisma db push
 ```
 
-## Local Development
-
+### 6. Local development
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Set up environment
 cp .env.example .env.local
-# Edit .env.local and add your Anthropic API key
-
-# 3. Run dev server
+# Fill in .env.local
+npx prisma generate
+npx prisma db push
 npm run dev
-
-# Open http://localhost:3000
 ```
 
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | For AI Analyst only | Get from console.anthropic.com |
-
-The username, email, IP, phone, domain, and Discord modules work without any API keys. They use:
-- **Google DNS-over-HTTPS** (`dns.google`) for DNS lookups
-- **ipapi.co** for IP geolocation (free tier, no key needed)
-- **CORS HEAD requests** for username platform scanning
-
-## Tech Stack
-
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Pure CSS (zero dependencies)
-- **APIs**: Google DNS-over-HTTPS, ipapi.co, Anthropic Claude
-- **Deployment**: Vercel (Edge Runtime for AI route)
-
-## Legal Notice
-
-This tool is for educational and ethical security research purposes only. Only investigate targets you are authorized to examine, or public information about yourself. The developers assume no liability for misuse.
+## Legal
+CloudSINT is for educational and ethical security research only. Only investigate targets you are authorized to examine or public information about yourself.
